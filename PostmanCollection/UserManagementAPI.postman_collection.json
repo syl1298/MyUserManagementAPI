@@ -1,0 +1,395 @@
+{
+	"info": {
+		"_postman_id": "user-management-api",
+		"name": "User Management API - CRUD Tests",
+		"description": "Complete test collection for User Management API CRUD operations",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. GET All Users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is an array\", function () {",
+							"    pm.expect(pm.response.json()).to.be.an('array');",
+							"});",
+							"",
+							"pm.test(\"Users have required properties\", function () {",
+							"    const users = pm.response.json();",
+							"    if (users.length > 0) {",
+							"        pm.expect(users[0]).to.have.property('id');",
+							"        pm.expect(users[0]).to.have.property('firstName');",
+							"        pm.expect(users[0]).to.have.property('lastName');",
+							"        pm.expect(users[0]).to.have.property('email');",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/user",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "user"]
+				},
+				"description": "Retrieves all users from the system"
+			},
+			"response": []
+		},
+		{
+			"name": "2. GET User by ID (Valid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"User has correct ID\", function () {",
+							"    const user = pm.response.json();",
+							"    pm.expect(user.id).to.equal(1);",
+							"});",
+							"",
+							"pm.test(\"User has all required fields\", function () {",
+							"    const user = pm.response.json();",
+							"    pm.expect(user).to.have.property('firstName');",
+							"    pm.expect(user).to.have.property('lastName');",
+							"    pm.expect(user).to.have.property('email');",
+							"    pm.expect(user).to.have.property('createdAt');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/user/1",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "user", "1"]
+				},
+				"description": "Retrieves a specific user by their ID"
+			},
+			"response": []
+		},
+		{
+			"name": "3. GET User by ID (Invalid - Not Found)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Error message is present\", function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('message');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/user/9999",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "user", "9999"]
+				},
+				"description": "Tests retrieval of a non-existent user"
+			},
+			"response": []
+		},
+		{
+			"name": "4. POST Create New User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"User was created with ID\", function () {",
+							"    const user = pm.response.json();",
+							"    pm.expect(user).to.have.property('id');",
+							"    pm.environment.set('createdUserId', user.id);",
+							"});",
+							"",
+							"pm.test(\"Created user has correct data\", function () {",
+							"    const user = pm.response.json();",
+							"    pm.expect(user.firstName).to.equal('Alice');",
+							"    pm.expect(user.lastName).to.equal('Johnson');",
+							"    pm.expect(user.email).to.equal('alice.johnson@example.com');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Johnson\",\n  \"email\": \"alice.johnson@example.com\",\n  \"phoneNumber\": \"555-123-4567\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/user",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "user"]
+				},
+				"description": "Creates a new user in the system"
+			},
+			"response": []
+		},
+		{
+			"name": "5. POST Create User (Invalid - Missing Required Fields)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"firstName\": \"Bob\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/user",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "user"]
+				},
+				"description": "Tests validation by attempting to create a user with missing required fields"
+			},
+			"response": []
+		},
+		{
+			"name": "6. PUT Update Existing User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"User data was updated\", function () {",
+							"    const user = pm.response.json();",
+							"    pm.expect(user.firstName).to.equal('Alice Updated');",
+							"    pm.expect(user.updatedAt).to.not.be.null;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"firstName\": \"Alice Updated\",\n  \"lastName\": \"Johnson\",\n  \"email\": \"alice.updated@example.com\",\n  \"phoneNumber\": \"555-999-8888\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/user/{{createdUserId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "user", "{{createdUserId}}"]
+				},
+				"description": "Updates an existing user's details"
+			},
+			"response": []
+		},
+		{
+			"name": "7. PUT Update User (Invalid - Not Found)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Error message is present\", function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('message');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"firstName\": \"NonExistent\",\n  \"lastName\": \"User\",\n  \"email\": \"nonexistent@example.com\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/user/9999",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "user", "9999"]
+				},
+				"description": "Tests updating a non-existent user"
+			},
+			"response": []
+		},
+		{
+			"name": "8. DELETE User by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Success message is present\", function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('message');",
+							"    pm.expect(response.message).to.include('deleted');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/user/{{createdUserId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "user", "{{createdUserId}}"]
+				},
+				"description": "Deletes a user from the system"
+			},
+			"response": []
+		},
+		{
+			"name": "9. DELETE User (Invalid - Not Found)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Error message is present\", function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('message');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/user/9999",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "user", "9999"]
+				},
+				"description": "Tests deleting a non-existent user"
+			},
+			"response": []
+		},
+		{
+			"name": "10. Verify User Deleted (GET After DELETE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"User no longer exists\", function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('message');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/user/{{createdUserId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "user", "{{createdUserId}}"]
+				},
+				"description": "Verifies that the deleted user no longer exists"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://localhost:7000",
+			"type": "string"
+		}
+	]
+}
